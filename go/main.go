@@ -1,0 +1,77 @@
+package main
+
+import (
+	"context"
+	"go-bench/internal/handler"
+	"go-bench/internal/metrics"
+	"go-bench/internal/users"
+	"log"
+	"os"
+	"runtime"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/valyala/fasthttp"
+)
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
+
+func main() {
+	log.Printf("Build time: %s", os.Getenv("TIMESTAMP"))
+	log.Printf("Set GOMAXPROCS to %d", runtime.GOMAXPROCS(0))
+
+	db := initDb()
+	defer db.Close()
+
+	handler := handler.New(metrics.New(), users.New(db))
+
+	server := &fasthttp.Server{
+		Handler:                      handler.Router,
+		Name:                         "Go-Server",
+		ReadTimeout:                  0,
+		WriteTimeout:                 0,
+		IdleTimeout:                  0,
+		DisablePreParseMultipartForm: true,
+		NoDefaultServerHeader:        true,
+		NoDefaultContentType:         true,
+		NoDefaultDate:                true,
+		ReadBufferSize:               4096,
+		WriteBufferSize:              4096,
+		Concurrency:                  0,
+	}
+
+	log.Printf("Go FastHTTP Server started at :8081")
+	if err := server.ListenAndServe(":8081"); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
+}
+
+func initDb() *pgxpool.Pool {
+	config, err := pgxpool.ParseConfig("host=db port=5432 user=test password=test dbname=test sslmode=disable")
+	if err != nil {
+		log.Fatalf("Failed to parse connection string: %v", err)
+	}
+
+	config.MaxConns = 100
+	config.MinConns = 25
+	config.MaxConnIdleTime = 0
+	config.HealthCheckPeriod = 1 * time.Minute
+
+	db, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	err = db.Ping(context.Background())
+	if err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+
+	return db
+}
