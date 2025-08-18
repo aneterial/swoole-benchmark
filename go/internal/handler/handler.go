@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"go-bench/internal/asynclogs"
 	"go-bench/internal/metrics"
 	"go-bench/internal/users"
+	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func (h *Handler) Router(ctx *fasthttp.RequestCtx) {
 	if loadTest {
 		requestId, _ = uuid.NewV7()
 		h.metrics.Save(ctx, metrics.MemoryStart, metrics.GetMemoryUsage())
-		asynclogs.Info("Start request [%s]: %s %s", requestId.String(), method, path)
+		log.Printf("Start request [%s]: %s %s", requestId.String(), method, path)
 	}
 
 	switch {
@@ -59,7 +59,7 @@ func (h *Handler) Router(ctx *fasthttp.RequestCtx) {
 
 	if loadTest {
 		h.metrics.Save(ctx, metrics.MemoryEnd, metrics.GetMemoryUsage())
-		asynclogs.Info("End request [%s]: %s %s", requestId.String(), method, path)
+		log.Printf("End request [%s]: %s %s", requestId.String(), method, path)
 	}
 }
 

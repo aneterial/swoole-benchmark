@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Utils\Metrics;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Octane\Facades\Octane;
 
 final readonly class UserService implements UserServiceInterface
@@ -18,11 +18,11 @@ final readonly class UserService implements UserServiceInterface
     public function getUsers(string $name): array
     {
         $result = Octane::concurrently([
-            'data' => static fn (): Collection => User::query()
+            'data' => static fn (): Collection => DB::table('users')
                 ->where('name', 'like', "%$name%")
                 ->limit(100)
                 ->get(),
-            'total' => static fn (): int => User::query()
+            'total' => static fn (): int => DB::table('users')
                 ->where('name', 'like', "%$name%")
                 ->count(),
         ]);

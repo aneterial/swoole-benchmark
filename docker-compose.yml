@@ -94,8 +94,8 @@ services:
     restart: unless-stopped
     init: true
     command: ["--workers=4", "--task-workers=4", "--max-requests=10000"]
-    volumes:
-      - ./octane:/app:rw
+    # volumes:
+    #   - ./octane:/app:rw
     depends_on:
       - db
       - redis

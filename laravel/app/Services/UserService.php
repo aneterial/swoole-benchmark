@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Utils\Metrics;
+use Illuminate\Support\Facades\DB;
 
 final readonly class UserService implements UserServiceInterface
 {
@@ -16,11 +16,11 @@ final readonly class UserService implements UserServiceInterface
     public function getUsers(string $name): array
     {
         $result = [
-            'data' => User::query()
+            'data' => DB::table('users')
                 ->where('name', 'like', "%$name%")
                 ->limit(100)
                 ->get(),
-            'total' => User::query()
+            'total' => DB::table('users')
                 ->where('name', 'like', "%$name%")
                 ->count(),
         ];
