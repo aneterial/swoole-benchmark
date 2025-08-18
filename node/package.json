@@ -1,0 +1,20 @@
+{
+  "name": "node-benchmark",
+  "version": "1.0.0",
+  "description": "Node.js benchmark server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node cluster.js",
+    "dev": "node --watch server.js",
+    "cluster": "node cluster.js"
+  },
+  "dependencies": {
+    "find-my-way": "^5.0.0",
+    "pg": "^8.12.0",
+    "redis": "^4.6.14",
+    "uuid": "^11.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
