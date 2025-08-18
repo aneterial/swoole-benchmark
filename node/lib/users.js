@@ -1,26 +1,23 @@
-const pgPool = require('./database');
+const { getWorkerClient } = require('./database');
 
 async function getUsers(searchName) {
-  const client = await pgPool.connect();
-  try {
-    const usersPromise = client.query(
-      'SELECT id, name, email, age, created_at, updated_at FROM users WHERE name LIKE $1 LIMIT 100',
-      [`%${searchName}%`]
-    );
-    const totalPromise = client.query(
-      'SELECT COUNT(*)::bigint AS total FROM users WHERE name LIKE $1',
-      [`%${searchName}%`]
-    );
+  const client = getWorkerClient();
 
-    const [usersResult, totalResult] = await Promise.all([usersPromise, totalPromise]);
+  const usersPromise = client.query(
+    'SELECT id, name, email, age, created_at, updated_at FROM users WHERE name LIKE $1 LIMIT 100',
+    [`%${searchName}%`]
+  );
+  const totalPromise = client.query(
+    'SELECT COUNT(*)::bigint AS total FROM users WHERE name LIKE $1',
+    [`%${searchName}%`]
+  );
 
-    const users = usersResult.rows;
-    const total = Number(totalResult.rows[0]?.total || 0);
+  const [usersResult, totalResult] = await Promise.all([usersPromise, totalPromise]);
 
-    return { users, total };
-  } finally {
-    client.release();
-  }
+  const users = usersResult.rows;
+  const total = Number(totalResult.rows[0]?.total || 0);
+
+  return { users, total };
 }
 
 module.exports = {
