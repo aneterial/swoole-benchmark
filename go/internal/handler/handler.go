@@ -41,8 +41,8 @@ func (h *Handler) Router(ctx *fasthttp.RequestCtx) {
 
 	var requestId uuid.UUID
 	if loadTest {
-		requestId, _ := uuid.NewV7()
-		h.metrics.Save(metrics.MemoryStart, metrics.GetMemoryUsage())
+		requestId, _ = uuid.NewV7()
+		h.metrics.Save(ctx, metrics.MemoryStart, metrics.GetMemoryUsage())
 		asynclogs.Info("Start request [%s]: %s %s", requestId.String(), method, path)
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) Router(ctx *fasthttp.RequestCtx) {
 	}
 
 	if loadTest {
-		h.metrics.Save(metrics.MemoryEnd, metrics.GetMemoryUsage())
+		h.metrics.Save(ctx, metrics.MemoryEnd, metrics.GetMemoryUsage())
 		asynclogs.Info("End request [%s]: %s %s", requestId.String(), method, path)
 	}
 }
@@ -70,7 +70,7 @@ func (h *Handler) HandleMetrics(ctx *fasthttp.RequestCtx, path string) {
 		return
 	}
 
-	stats := h.metrics.GetStats(metrics.Type(metricType))
+	stats := h.metrics.GetStats(ctx, metrics.Type(metricType))
 
 	response, _ := json.Marshal(stats)
 	ctx.SetContentType(JsonContentType)
@@ -87,7 +87,7 @@ func (h *Handler) HandleUsers(ctx *fasthttp.RequestCtx, path string) {
 
 	users, total := h.users.GetUsers(ctx, searchName)
 
-	h.metrics.Save(metrics.MemoryProcess, metrics.GetMemoryUsage())
+	h.metrics.Save(ctx, metrics.MemoryProcess, metrics.GetMemoryUsage())
 
 	data, _ := json.Marshal(map[string]any{
 		"total": total,
@@ -109,5 +109,8 @@ func (h *Handler) getUriParam(path string, position int) (string, bool) {
 func (h *Handler) HandleSample(ctx *fasthttp.RequestCtx, path string) {
 	ctx.SetContentType(JsonContentType)
 	ctx.SetStatusCode(fasthttp.StatusOK)
-	ctx.SetBody([]byte("{\"status\": \"ok\"}"))
+	payload, _ := json.Marshal(map[string]string{
+		"status": "ok",
+	})
+	ctx.SetBody(payload)
 }

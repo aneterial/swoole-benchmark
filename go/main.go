@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 	"github.com/valyala/fasthttp"
 )
 
@@ -29,7 +30,10 @@ func main() {
 	db := initDb()
 	defer db.Close()
 
-	handler := handler.New(metrics.New(), users.New(db))
+	redis := initRedis()
+	defer redis.Close()
+
+	handler := handler.New(metrics.New(redis), users.New(db))
 
 	server := &fasthttp.Server{
 		Handler:                      handler.Router,
@@ -68,10 +72,28 @@ func initDb() *pgxpool.Pool {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	err = db.Ping(context.Background())
-	if err != nil {
+	if err = db.Ping(context.Background()); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
 
 	return db
+}
+
+func initRedis() *redis.Client {
+	redis := redis.NewClient(&redis.Options{
+		Addr:         "redis:6379",
+		Password:     "",
+		DB:           0,
+		Username:     "",
+		MaxRetries:   5,
+		DialTimeout:  10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	})
+
+	if err := redis.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("failed to connect to redis server: %s\n", err.Error())
+	}
+
+	return redis
 }

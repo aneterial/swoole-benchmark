@@ -10,7 +10,7 @@ use PDO;
 
 final readonly class Users
 {
-    public function __construct(private PDOPool $pool)
+    public function __construct(private PDOPool $db)
     {
     }
 
@@ -20,7 +20,7 @@ final readonly class Users
 
         Coroutine::join([
             go(function() use ($name, &$results): void {
-                $pdo = $this->pool->get();
+                $pdo = $this->db->get();
                 try {
                     $stmt = $pdo->prepare('SELECT * FROM users WHERE name LIKE :name LIMIT 100');
                     $stmt->bindValue('name', "%$name%", PDO::PARAM_STR);
@@ -28,11 +28,11 @@ final readonly class Users
                     $results['data'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     unset($stmt);
                 } finally {
-                    $this->pool->put($pdo);
+                    $this->db->put($pdo);
                 }
             }),
             go(function() use ($name, &$results): void {
-                $pdo = $this->pool->get();
+                $pdo = $this->db->get();
                 try {
                     $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM users WHERE name LIKE :name');
                     $stmt->bindValue('name', "%$name%", PDO::PARAM_STR);
@@ -41,7 +41,7 @@ final readonly class Users
                     $results['total'] = $count['total'];
                     unset($stmt);
                 } finally {
-                    $this->pool->put($pdo);
+                    $this->db->put($pdo);
                 }
             })
         ]);

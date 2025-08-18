@@ -1,10 +1,14 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"slices"
+	"strconv"
 	"sync"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type Type string
@@ -23,43 +27,24 @@ type MetricsUnit struct {
 }
 
 type Metrics struct {
-	Units map[Type]*MetricsUnit
+	redis *redis.Client
 }
 
-func New() *Metrics {
-	units := [...]Type{MemoryStart, MemoryEnd, MemoryProcess}
-	unitsMap := make(map[Type]*MetricsUnit, len(units))
-	for _, unit := range units {
-		unitsMap[unit] = &MetricsUnit{
-			Data: make([]uint64, 0, Limit+10),
-		}
-	}
-
+func New(redis *redis.Client) *Metrics {
 	return &Metrics{
-		Units: unitsMap,
+		redis: redis,
 	}
 }
 
-func (m *Metrics) Save(unitType Type, value uint64) {
+func (m *Metrics) Save(ctx context.Context, unitType Type, value uint64) {
 	go func() {
-		unit, ok := m.Units[unitType]
-		if !ok {
-			return
-		}
-
-		unit.Mutex.Lock()
-		defer unit.Mutex.Unlock()
-
-		unit.Data = append(unit.Data, value)
-		if len(unit.Data) > Limit {
-			unit.Data = unit.Data[1:]
-		}
+		m.redis.RPush(ctx, normalizeKey(unitType), value)
 	}()
 }
 
-func (m *Metrics) GetStats(unitType Type) map[string]any {
-	unit, ok := m.Units[unitType]
-	if !ok || len(unit.Data) == 0 {
+func (m *Metrics) GetStats(ctx context.Context, unitType Type) map[string]any {
+	unit, err := m.redis.LRange(ctx, normalizeKey(unitType), 0, -1).Result()
+	if err != nil || len(unit) == 0 {
 		return map[string]any{
 			"raw": map[string]uint64{
 				"max": 0,
@@ -78,8 +63,10 @@ func (m *Metrics) GetStats(unitType Type) map[string]any {
 		}
 	}
 
-	sorted := make([]uint64, len(unit.Data))
-	copy(sorted, unit.Data)
+	sorted := make([]uint64, len(unit))
+	for i, v := range unit {
+		sorted[i], _ = strconv.ParseUint(v, 10, 64)
+	}
 	slices.Sort(sorted)
 
 	count := len(sorted)
@@ -138,4 +125,8 @@ func formatBytes(bytes uint64, precision int) string {
 	}
 
 	return fmt.Sprintf("%.*f %s", precision, value, units[i])
+}
+
+func normalizeKey(key Type) string {
+	return "go:memory:" + string(key)
 }

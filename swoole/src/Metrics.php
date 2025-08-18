@@ -4,29 +4,31 @@ declare(strict_types=1);
 
 namespace App;
 
+use Swoole\Database\RedisPool;
+
 final class Metrics
 {
     public const string MEMORY_START = 'start';
     public const string MEMORY_END = 'end';
     public const string MEMORY_PROCESS = 'process';
 
-    private array $metrics = [];
-
-    public function __construct(private readonly int $limit = 500)
+    public function __construct(private readonly RedisPool $redis)
     {
     }
 
     public function save(string $key, int $value): void
     {
-        $this->metrics[$key][] = $value;
-        if (count($this->metrics[$key]) > $this->limit) {
-            array_shift($this->metrics[$key]);
+        try {
+            $connect = $this->redis->get();
+            $connect->rPush($this->normalizeKey($key), $value);
+        } finally {
+            $this->redis->put($connect);
         }
     }
 
     public function getStats(string $key): array
     {
-        $metrics = $this->metrics[$key] ?? [];
+        $metrics = $this->getList($key);
         if (empty($metrics)) {
             return [
                 'raw' => [
@@ -73,6 +75,19 @@ final class Metrics
         ];
     }
 
+    /**
+     * @return list<int>
+     */
+    private function getList(string $key): array
+    {
+        try {
+            $connect = $this->redis->get();
+            return array_map('intval', $connect->lRange($this->normalizeKey($key), 0, -1));
+        } finally {
+            $this->redis->put($connect);
+        }
+    }
+
     private function formatBytes(float $bytes, int $precision = 2): string {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
@@ -81,5 +96,10 @@ final class Metrics
         }
 
         return round($bytes, $precision) . ' ' . $units[$i];
+    }
+
+    private function normalizeKey(string $key): string
+    {
+        return "swoole:memory:$key";
     }
 }

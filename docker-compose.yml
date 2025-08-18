@@ -61,6 +61,50 @@ services:
           cpus: '2'
           memory: 1G
 
+  laravel-server:
+    build:
+      context: .
+      dockerfile: laravel/Dockerfile
+    restart: unless-stopped
+    # volumes:
+    #   - ./laravel:/app:rw
+    command: unitd --no-daemon --user laravel --group laravel --control unix:/tmp/control.unit.sock
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    depends_on:
+      - db
+    ports:
+      - 8083:8083
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
+  octane-server:
+    build:
+      context: .
+      dockerfile: octane/Dockerfile
+    restart: unless-stopped
+    init: true
+    command: ["--workers=4", "--task-workers=4", "--max-requests=10000"]
+    volumes:
+      - ./octane:/app:rw
+    depends_on:
+      - db
+    ports:
+      - 8084:8084
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
   db:
     image: postgres
     restart: unless-stopped
@@ -79,6 +123,20 @@ services:
       - dbdata:/var/lib/postgresql/data/
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: postgres -c max_connections=200
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  redis-manager:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - redis
 
 volumes:
   dbdata:

@@ -30,6 +30,6 @@ final readonly class Handler
 
     public function sample(array $vars, Request $request): string
     {
-        return '{"status": "ok"}';
+        return json_encode(['status' => 'ok'], JSON_UNESCAPED_UNICODE);
     }
 }

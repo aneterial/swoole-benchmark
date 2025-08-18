@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Exception\Handler;
 
-use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\Logger\LoggerFactory;

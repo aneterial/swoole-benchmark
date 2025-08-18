@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use DateTime;
 use App\Utils\Metrics;
 use Hyperf\Di\Annotation\Inject;
 use Psr\Http\Message\ResponseInterface;

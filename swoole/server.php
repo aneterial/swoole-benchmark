@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once "./vendor/autoload.php";
 
-use App\AsyncLogs;
 use App\Handler;
 use App\Metrics;
 use App\Users;
@@ -14,6 +13,8 @@ use Ramsey\Uuid\Uuid;
 use Swoole\Coroutine;
 use Swoole\Database\PDOConfig;
 use Swoole\Database\PDOPool;
+use Swoole\Database\RedisConfig;
+use Swoole\Database\RedisPool;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Swoole\Http\Server;
@@ -22,7 +23,7 @@ use function FastRoute\simpleDispatcher;
 
 Coroutine::set(['hook_flags' => SWOOLE_HOOK_ALL]);
 
-$pool = new PDOPool(
+$db = new PDOPool(
     config: new PDOConfig()
         ->withDriver('pgsql')
         ->withHost('db')
@@ -33,8 +34,16 @@ $pool = new PDOPool(
         ->withPassword('test'),
     size: 100
 );
-$metrics = new Metrics();
-$handler = new Handler($metrics, new Users($pool));
+$redis = new RedisPool(
+    config: new RedisConfig()
+        ->withHost('redis')
+        ->withPort(6379)
+        ->withTimeout(10.0),
+    size: 10
+);
+
+$metrics = new Metrics($redis);
+$handler = new Handler($metrics, new Users($db));
 
 $server = new Server(port: 8080, mode: SWOOLE_PROCESS);
 $server->set([

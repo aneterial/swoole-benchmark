@@ -1,0 +1,86 @@
+{
+  "settings": {
+    "http": {
+      "max_body_size": 52428800,
+      "large_header_buffer_size": 16384
+    }
+  },
+
+  "listeners": {
+    "*:8083": {
+      "pass": "routes"
+    }
+  },
+
+  "routes": [
+    {
+      "match": {
+        "uri": [
+          "*.manifest",
+          "*.appcache",
+          "*.html",
+          "*.json",
+          "*.rss",
+          "*.atom",
+          "*.jpg",
+          "*.jpeg",
+          "*.gif",
+          "*.png",
+          "*.ico",
+          "*.cur",
+          "*.gz",
+          "*.svg",
+          "*.svgz",
+          "*.mp4",
+          "*.ogg",
+          "*.ogv",
+          "*.webm",
+          "*.htc",
+          "*.css",
+          "*.js",
+          "*.ttf",
+          "*.ttc",
+          "*.otf",
+          "*.eot",
+          "*.woff",
+          "*.woff2",
+          "/robot.txt"
+        ]
+      },
+      "action": {
+        "share": "/app/public$uri"
+      }
+    },
+    {
+      "action": {
+        "pass": "applications/php"
+      }
+    }
+  ],
+
+  "applications": {
+    "php": {
+      "type": "php 8.4",
+      "limits": {
+        "requests": 0,
+        "timeout": 60
+      },
+      "processes": {
+        "max": 9,
+        "spare": 4,
+        "idle_timeout": 30
+      },
+      "user": "laravel",
+      "group": "laravel",
+      "working_directory": "/app/",
+      "root": "/app/public",
+       "options": {
+           "file": "/usr/local/etc/php/conf.d/php.ini"
+       },
+
+      "script": "index.php",
+      "index": "index.php"
+    }
+  },
+  "access_log": "/dev/null"
+}

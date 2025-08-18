@@ -11,6 +11,6 @@ final readonly class SampleController
 {
     public function index(ResponseInterface $response): PsrResponseInterface
     {
-        return $response->raw('{"status": "ok"}');
+        return $response->json(['status' => 'ok']);
     }
 }

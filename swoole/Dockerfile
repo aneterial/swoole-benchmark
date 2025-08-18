@@ -12,7 +12,7 @@ RUN composer install \
     --prefer-dist
 
 # Основной образ
-FROM unit:1.34.1-php8.4
+FROM php:8.4-cli
 
 ARG UID=1000
 ARG GID=1000
@@ -62,9 +62,10 @@ RUN apt-get update && apt-get --no-install-recommends --no-install-suggests -y i
 
 # Install PHP extensions
 RUN pecl channel-update pecl.php.net \
+    && pecl install redis \
     && pecl install -D 'enable-sockets="no" enable-openssl="yes" enable-http2="yes" enable-mysqlnd="yes" enable-swoole-pgsql="yes" enable-swoole-curl="yes" enable-cares="yes"' swoole-6.0.2 \
     && rm -rf /tmp/pear \
-    && docker-php-ext-enable  swoole
+    && docker-php-ext-enable redis swoole
 
 # Configure and install extensions
 RUN docker-php-ext-configure gd --with-webp \
