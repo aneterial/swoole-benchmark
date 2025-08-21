@@ -25,7 +25,7 @@ final class MetricsAspect extends AbstractAspect
     {
         $result = $proceedingJoinPoint->process();
 
-        $this->metrics->save(Metrics::MEMORY_PROCESS, memory_get_usage());
+        $this->metrics->save(Metrics::MEMORY_PROCESS, memory_get_usage(true));
 
         return $result;
     }

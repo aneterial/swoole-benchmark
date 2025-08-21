@@ -32,7 +32,7 @@ $db = new PDOPool(
         ->withCharset('utf8')
         ->withUsername('test')
         ->withPassword('test'),
-    size: 100
+    size: 25
 );
 $redis = new RedisPool(
     config: new RedisConfig()
@@ -73,7 +73,7 @@ $server->on('request', static function (Request $request, Response $response) us
         $loadTest = str_contains($uri, '/users/');
         if ($loadTest) {
             $requestId = Uuid::uuid7()->toString();
-            $metrics->save(Metrics::MEMORY_START, memory_get_usage());
+            $metrics->save(Metrics::MEMORY_START, memory_get_usage(true));
             printf("Start request [%s]: %s\n", $requestId, $uri);
         }
 
@@ -84,7 +84,7 @@ $server->on('request', static function (Request $request, Response $response) us
 
         if ($loadTest) {
             printf("End request [%s]: %s\n", $requestId, $uri);
-            $metrics->save(Metrics::MEMORY_END, memory_get_usage());
+            $metrics->save(Metrics::MEMORY_END, memory_get_usage(true));
         }
 
     } catch (Throwable $e) {

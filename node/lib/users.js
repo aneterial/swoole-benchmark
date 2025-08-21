@@ -1,4 +1,5 @@
 const pgPool = require('./database');
+const { v7: uuidv7 } = require('uuid');
 
 async function getUsers(searchName) {
   const client = await pgPool.connect();
@@ -12,12 +13,25 @@ async function getUsers(searchName) {
       [`%${searchName}%`]
     );
 
-    const [usersResult, totalResult] = await Promise.all([usersPromise, totalPromise]);
+    const uuidsPromise = (async () => {
+      const uuids = [];
+      for (let i = 0; i < 1000; i++) {
+        uuids.push(uuidv7());
+      }
+      return uuids;
+    })();
+
+    const [usersResult, totalResult, uuids] = await Promise.all([usersPromise, totalPromise, uuidsPromise]);
 
     const users = usersResult.rows;
     const total = Number(totalResult.rows[0]?.total || 0);
 
-    return { users, total };
+    const usersWithUuids = {};
+    users.forEach((user, index) => {
+        usersWithUuids[uuids[index]] = user;
+    });
+
+    return { users: usersWithUuids, total };
   } finally {
     client.release();
   }

@@ -7,6 +7,7 @@ namespace App;
 use Swoole\Coroutine;
 use Swoole\Database\PDOPool;
 use PDO;
+use Ramsey\Uuid\Uuid;
 
 final readonly class Users
 {
@@ -17,6 +18,7 @@ final readonly class Users
     public function getUsers(string $name): array
     {
         $results = [];
+        $uuids = [];
 
         Coroutine::join([
             go(function() use ($name, &$results): void {
@@ -43,8 +45,19 @@ final readonly class Users
                 } finally {
                     $this->db->put($pdo);
                 }
-            })
+            }),
+            go(static function() use (&$uuids): void {
+                for ($i = 0; $i < 1000; $i++) {
+                    $uuid = Uuid::uuid7()->toString();
+                    $uuids[] = $uuid;
+                }
+            }),
         ]);
+
+        $results['data'] = array_combine(
+            array_slice($uuids, 0, count($results['data'])),
+            $results['data']
+        );
 
         return $results;
     }

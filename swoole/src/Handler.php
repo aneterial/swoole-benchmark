@@ -23,7 +23,7 @@ final readonly class Handler
     {
         $results = $this->users->getUsers($vars['name']);
 
-        $this->metrics->save('process', memory_get_usage());
+        $this->metrics->save('process', memory_get_usage(true));
 
         return json_encode($results, JSON_UNESCAPED_UNICODE);
     }

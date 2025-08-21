@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Annotation\Metrics;
 use Hyperf\Collection\Collection;
 use Hyperf\DbConnection\Db;
+use Ramsey\Uuid\Uuid;
 
 use function Hyperf\Coroutine\parallel;
 
@@ -15,16 +16,29 @@ final readonly class UserService implements UserServiceInterface
     #[Metrics]
     public function getUsers(string $name): array
     {
-        return parallel([
-            'data' => static fn (): Collection => Db::connection()
+        $data = parallel([
+            'data' => static fn (): array => Db::connection()
                 ->table('users')
                 ->where('name', 'like', "%$name%")
                 ->limit(100)
-                ->get(),
+                ->get()
+                ->all(),
             'total' => static fn (): int => Db::connection()
                 ->table('users')
                 ->where('name', 'like', "%$name%")
                 ->count(),
+            'uuids' => static fn (): array => array_map(
+                static fn (): string => Uuid::uuid7()->toString(),
+                range(0, 1000)
+            ),
         ]);
+
+        return [
+            'data' => array_combine(
+                array_slice($data['uuids'], 0, count($data['data'])),
+                $data['data']
+            ),
+            'total' => $data['total'],
+        ];
     }
 }

@@ -93,7 +93,7 @@ services:
       dockerfile: octane/Dockerfile
     restart: unless-stopped
     init: true
-    command: ["--workers=4", "--task-workers=4", "--max-requests=10000"]
+    command: ["--workers=8", "--task-workers=8", "--max-requests=10000"]
     # volumes:
     #   - ./octane:/app:rw
     depends_on:
@@ -149,10 +149,26 @@ services:
       - dbdata:/var/lib/postgresql/data/
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: postgres -c max_connections=200
+    deploy:
+      resources:
+        limits:
+          cpus: '27'
+          memory: 32G
+        reservations:
+          cpus: '16'
+          memory: 16G
 
   redis:
     image: redis:alpine
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
 
   redis-manager:
     build:

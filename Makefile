@@ -33,22 +33,22 @@ bench-node:
 
 # Бенчмарки нагрузки сервера
 bench-swoole-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${SWOOLE_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${SWOOLE_PORT}/sample
 
 bench-go-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${GO_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${GO_PORT}/sample
 
 bench-hyperf-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${HYPERF_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${HYPERF_PORT}/sample
 
 bench-laravel-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${LARAVEL_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${LARAVEL_PORT}/sample
 
 bench-octane-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${OCTANE_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${OCTANE_PORT}/sample
 
 bench-node-sample:
-	ab -n 1000000 -c 100 -k http://localhost:${NODE_PORT}/sample
+	ab -n 5000000 -c 800 -k http://localhost:${NODE_PORT}/sample
 
 # Сборка контейнеров
 build-swoole:

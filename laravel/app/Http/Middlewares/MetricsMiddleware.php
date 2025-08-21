@@ -17,11 +17,11 @@ final readonly class MetricsMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        $this->metrics->save(Metrics::MEMORY_START, memory_get_usage());
+        $this->metrics->save(Metrics::MEMORY_START, memory_get_usage(true));
 
         $response = $next($request);
 
-        $this->metrics->save(Metrics::MEMORY_END, memory_get_usage());
+        $this->metrics->save(Metrics::MEMORY_END, memory_get_usage(true));
 
         return $response;
     }

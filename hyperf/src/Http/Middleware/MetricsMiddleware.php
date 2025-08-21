@@ -18,11 +18,11 @@ final readonly class MetricsMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $this->metrics->save(Metrics::MEMORY_START, memory_get_usage());
+        $this->metrics->save(Metrics::MEMORY_START, memory_get_usage(true));
 
         $response = $handler->handle($request);
 
-        $this->metrics->save(Metrics::MEMORY_END, memory_get_usage());
+        $this->metrics->save(Metrics::MEMORY_END, memory_get_usage(true));
 
         return $response;
     }

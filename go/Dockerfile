@@ -25,7 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /app/.env .env
 
-ENV GOMAXPROCS=4
+ENV GOMAXPROCS=5
 ENV GOGC=100
 ENV GODEBUG=netdns=go
 
