@@ -18,4 +18,9 @@ final readonly class UsersController
     {
         return $response->json($this->userService->getUsers($name));
     }
+
+    public function indexV2(string $name, ResponseInterface $response): PsrResponseInterface
+    {
+        return $response->json($this->userService->getUsersV2($name));
+    }
 }

@@ -4,6 +4,8 @@ FROM composer:2.8.5 AS composer-deps
 WORKDIR /app
 COPY hyperf/composer.* ./
 RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
     --ignore-platform-reqs \
     --no-interaction \
     --no-plugins \
@@ -87,7 +89,7 @@ COPY --from=composer-deps /app/composer.lock ./composer.lock
 
 # Copy application code
 COPY hyperf/ .
-RUN composer dump-autoload --no-scripts --optimize --classmap-authoritative
+RUN composer dump-autoload --no-scripts --optimize --classmap-authoritative --no-dev
 
 # Change ownership to non-root user
 RUN chown -R "$USER":"$USER" /app

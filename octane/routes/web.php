@@ -14,6 +14,9 @@ Route::get(uri: '/sample', action: [SampleController::class, 'index']);
 Route::get(uri: '/users/{name}', action: [UsersController::class, 'index'])
     ->where('name', '[a-zA-Z0-9]+')
     ->middleware([RequestLogMiddleware::class, MetricsMiddleware::class]);
+Route::get(uri: '/v2/users/{name}', action: [UsersController::class, 'indexV2'])
+    ->where('name', '[a-zA-Z0-9]+')
+    ->middleware([RequestLogMiddleware::class, MetricsMiddleware::class]);
 
 Route::get(uri: '/metrics/{name}', action: [MetricsController::class, 'index'])
     ->where('key', '[a-zA-Z0-9]+');

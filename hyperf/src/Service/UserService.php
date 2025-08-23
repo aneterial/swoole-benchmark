@@ -16,6 +16,23 @@ final readonly class UserService implements UserServiceInterface
     #[Metrics]
     public function getUsers(string $name): array
     {
+        return parallel([
+            'data' => static fn (): array => Db::connection()
+                ->table('users')
+                ->where('name', 'like', "%$name%")
+                ->limit(100)
+                ->get()
+                ->all(),
+            'total' => static fn (): int => Db::connection()
+                ->table('users')
+                ->where('name', 'like', "%$name%")
+                ->count(),
+        ]);
+    }
+
+    #[Metrics]
+    public function getUsersV2(string $name): array
+    {
         $data = parallel([
             'data' => static fn (): array => Db::connection()
                 ->table('users')

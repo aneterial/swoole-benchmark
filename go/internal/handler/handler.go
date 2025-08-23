@@ -15,6 +15,7 @@ const (
 	SamplePath  = "/sample"
 	MetricsPath = "/metrics/"
 	UsersPath   = "/users/"
+	UsersV2Path = "/v2/users/"
 
 	MethodGet = "GET"
 
@@ -51,6 +52,8 @@ func (h *Handler) Router(ctx *fasthttp.RequestCtx) {
 		h.HandleMetrics(ctx, path)
 	case strings.HasPrefix(path, UsersPath) && method == MethodGet:
 		h.HandleUsers(ctx, path)
+	case strings.HasPrefix(path, UsersV2Path) && method == MethodGet:
+		h.HandleUsersV2(ctx, path)
 	case strings.HasPrefix(path, SamplePath) && method == MethodGet:
 		h.HandleSample(ctx, path)
 	default:
@@ -86,6 +89,26 @@ func (h *Handler) HandleUsers(ctx *fasthttp.RequestCtx, path string) {
 	}
 
 	users, total := h.users.GetUsers(ctx, searchName)
+
+	h.metrics.Save(ctx, metrics.MemoryProcess, metrics.GetMemoryUsage())
+
+	data, _ := json.Marshal(map[string]any{
+		"total": total,
+		"data":  users,
+	})
+	ctx.SetContentType(JsonContentType)
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	ctx.SetBody(data)
+}
+
+func (h *Handler) HandleUsersV2(ctx *fasthttp.RequestCtx, path string) {
+	searchName, ok := h.getUriParam(path, 3)
+	if !ok {
+		ctx.Error("Invalid user path", fasthttp.StatusBadRequest)
+		return
+	}
+
+	users, total := h.users.GetUsersV2(ctx, searchName)
 
 	h.metrics.Save(ctx, metrics.MemoryProcess, metrics.GetMemoryUsage())
 

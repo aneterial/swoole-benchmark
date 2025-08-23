@@ -28,6 +28,15 @@ final readonly class Handler
         return json_encode($results, JSON_UNESCAPED_UNICODE);
     }
 
+    public function usersV2(array $vars, Request $request): string
+    {
+        $results = $this->users->getUsersV2($vars['name']);
+
+        $this->metrics->save('process', memory_get_usage(true));
+
+        return json_encode($results, JSON_UNESCAPED_UNICODE);
+    }
+
     public function sample(array $vars, Request $request): string
     {
         return json_encode(['status' => 'ok'], JSON_UNESCAPED_UNICODE);

@@ -131,6 +131,29 @@ services:
           cpus: '2'
           memory: 1G
 
+  symfony-server:
+    build:
+      context: .
+      dockerfile: symfony/Dockerfile
+    restart: unless-stopped
+    # volumes:
+    #   - ./symfony:/app:rw
+    command: unitd --no-daemon --user symfony --group symfony --control unix:/tmp/control.unit.sock
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    depends_on:
+      - db
+      - redis
+    ports:
+      - ${SYMFONY_PORT}:8086
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
   db:
     image: postgres
     restart: unless-stopped
@@ -152,11 +175,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '27'
-          memory: 32G
+          cpus: ${DB_LIMIT_CPUS}
+          memory: ${DB_LIMIT_MEMORY}
         reservations:
-          cpus: '16'
-          memory: 16G
+          cpus: ${DB_RESERVATIONS_CPUS}
+          memory: ${DB_RESERVATIONS_MEMORY}
 
   redis:
     image: redis:alpine

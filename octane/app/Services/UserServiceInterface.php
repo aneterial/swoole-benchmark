@@ -7,4 +7,6 @@ namespace App\Services;
 interface UserServiceInterface
 {
     public function getUsers(string $name): array;
+
+    public function getUsersV2(string $name): array;
 }

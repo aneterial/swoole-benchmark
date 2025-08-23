@@ -1,0 +1,18 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+
+    session: false
+
+    serializer:
+        enabled: true
+        mapping:
+            paths: ['%kernel.project_dir%/config/packages/serializer.yaml']
+    property_info: true
+
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

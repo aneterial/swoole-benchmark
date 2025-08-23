@@ -1,0 +1,42 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
+
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Service\UserServiceInterface:
+        class: App\Service\UserService
+
+    App\Service\MetricsServiceInterface:
+        class: App\Service\MetricsService
+
+    App\Utils\Metrics:
+        public: true
+
+    App\Middleware\RequestLogMiddleware:
+        tags:
+            - { name: kernel.event_subscriber }
+
+    App\Middleware\MetricsMiddleware:
+        tags:
+            - { name: kernel.event_subscriber }
+
+    Redis:
+        class: Redis
+        calls:
+            - [connect, ['%env(REDIS_HOST)%', '%env(int:REDIS_PORT)%']]

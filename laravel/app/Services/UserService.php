@@ -26,6 +26,24 @@ final readonly class UserService implements UserServiceInterface
                 ->where('name', 'like', "%$name%")
                 ->count(),
         ];
+
+        $this->metrics->save(Metrics::MEMORY_PROCESS, memory_get_usage(true));
+
+        return $result;
+    }
+
+    public function getUsersV2(string $name): array
+    {
+        $result = [
+            'data' => DB::table('users')
+                ->where('name', 'like', "%$name%")
+                ->limit(100)
+                ->get()
+                ->all(),
+            'total' => DB::table('users')
+                ->where('name', 'like', "%$name%")
+                ->count(),
+        ];
         $uuids = array_map(
             static fn (): string => Uuid::uuid7()->toString(),
             range(0, 1000)

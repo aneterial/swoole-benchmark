@@ -18,6 +18,41 @@ final readonly class Users
     public function getUsers(string $name): array
     {
         $results = [];
+
+        Coroutine::join([
+            go(function() use ($name, &$results): void {
+                $pdo = $this->db->get();
+                try {
+                    $stmt = $pdo->prepare('SELECT * FROM users WHERE name LIKE :name LIMIT 100');
+                    $stmt->bindValue('name', "%$name%", PDO::PARAM_STR);
+                    $stmt->execute();
+                    $results['data'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    unset($stmt);
+                } finally {
+                    $this->db->put($pdo);
+                }
+            }),
+            go(function() use ($name, &$results): void {
+                $pdo = $this->db->get();
+                try {
+                    $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM users WHERE name LIKE :name');
+                    $stmt->bindValue('name', "%$name%", PDO::PARAM_STR);
+                    $stmt->execute();
+                    $count = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $results['total'] = $count['total'];
+                    unset($stmt);
+                } finally {
+                    $this->db->put($pdo);
+                }
+            }),
+        ]);
+
+        return $results;
+    }
+
+    public function getUsersV2(string $name): array
+    {
+        $results = [];
         $uuids = [];
 
         Coroutine::join([

@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Utils\Metrics;
 use Hyperf\Di\Annotation\Inject;
 
-class MetricsService implements MetricsServiceInterface
+final readonly class MetricsService implements MetricsServiceInterface
 {
     #[Inject]
     private Metrics $metrics;

@@ -19,4 +19,9 @@ final readonly class UsersController
     {
         return $this->userService->getUsers($name);
     }
+
+    public function indexV2(string $name): array
+    {
+        return $this->userService->getUsersV2($name);
+    }
 }

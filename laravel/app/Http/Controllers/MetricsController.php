@@ -12,9 +12,6 @@ final readonly class MetricsController
     {
     }
 
-    /**
-     * @return array{status: string}
-     */
     public function index(string $key): array
     {
         return $this->metricsService->getStats($key);

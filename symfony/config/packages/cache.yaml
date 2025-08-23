@@ -1,0 +1,12 @@
+framework:
+    cache:
+        prefix_seed: symfony
+
+        # Redis
+        app: cache.adapter.redis
+
+        pools:
+            doctrine.system_cache_pool:
+                adapter: cache.system
+            doctrine.query_cache_pool:
+                adapter: cache.system

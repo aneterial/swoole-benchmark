@@ -21,6 +21,9 @@ use Swoole\Http\Server;
 
 use function FastRoute\simpleDispatcher;
 
+const MODE = SWOOLE_BASE;
+const WORKER_NUM = 4;
+
 Coroutine::set(['hook_flags' => SWOOLE_HOOK_ALL]);
 
 $db = new PDOPool(
@@ -45,15 +48,18 @@ $redis = new RedisPool(
 $metrics = new Metrics($redis);
 $handler = new Handler($metrics, new Users($db));
 
-$server = new Server(port: 8080, mode: SWOOLE_PROCESS);
+$server = new Server(port: 8080, mode: MODE);
 $server->set([
     'enable_coroutine' => true,
-    'worker_num' => 4,
+    'worker_num' => WORKER_NUM,
 ]);
+
+printf("Server started in %s mode with %d workers\n", MODE, WORKER_NUM);
 
 $dispatcher = simpleDispatcher(static function (RouteCollector $r) use ($handler): void {
     $r->addRoute('GET', '/metrics/{name:[a-zA-Z0-9]+}', [$handler, 'metrics']);
     $r->addRoute('GET', '/users/{name:[a-zA-Z0-9]+}', [$handler, 'users']);
+    $r->addRoute('GET', '/v2/users/{name:[a-zA-Z0-9]+}', [$handler, 'usersV2']);
     $r->addRoute('GET', '/sample', [$handler, 'sample']);
 });
 

@@ -29,6 +29,7 @@ const (
 	serviceLaravel serviceType = "laravel"
 	serviceOctane  serviceType = "octane"
 	serviceNode    serviceType = "node"
+	serviceSymfony serviceType = "symfony"
 )
 
 var metricsTypes = [...]metricsType{
@@ -44,6 +45,7 @@ var services = [...]serviceType{
 	serviceLaravel,
 	serviceOctane,
 	serviceNode,
+	serviceSymfony,
 }
 
 func main() {

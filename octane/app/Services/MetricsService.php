@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Utils\Metrics;
 
-class MetricsService implements MetricsServiceInterface
+final readonly class MetricsService implements MetricsServiceInterface
 {
     public function __construct(private Metrics $metrics)
     {

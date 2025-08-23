@@ -4,6 +4,8 @@ FROM composer:2.8.5 AS composer-deps
 WORKDIR /app
 COPY laravel/composer.* ./
 RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
     --ignore-platform-reqs \
     --no-interaction \
     --no-plugins \
