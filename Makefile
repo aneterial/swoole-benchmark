@@ -6,6 +6,7 @@ LARAVEL_PORT := $(shell cat .env | grep "LARAVEL_PORT" | cut -d '=' -f2)
 OCTANE_PORT := $(shell cat .env | grep "OCTANE_PORT" | cut -d '=' -f2)
 NODE_PORT := $(shell cat .env | grep "NODE_PORT" | cut -d '=' -f2)
 SYMFONY_PORT := $(shell cat .env | grep "SYMFONY_PORT" | cut -d '=' -f2)
+GO_PREFORK_PORT := $(shell cat .env | grep "GO_PREFORK_PORT" | cut -d '=' -f2)
 
 # Первоначальная сборка и запуск серверов
 first-up:
@@ -34,6 +35,9 @@ bench-node:
 bench-symfony:
 	ab -n 20000 -c 50 -k http://localhost:${SYMFONY_PORT}/users/ser56
 
+bench-go-prefork:
+	ab -n 20000 -c 50 -k http://localhost:${GO_PREFORK_PORT}/users/ser56
+
 # Бенчмарки сервера+БД+io+генерация uuid
 bench-swoole-stress:
 	ab -n 20000 -c 50 -k http://localhost:${SWOOLE_PORT}/v2/users/ser56
@@ -55,6 +59,9 @@ bench-node-stress:
 
 bench-symfony-stress:
 	ab -n 20000 -c 50 -k http://localhost:${SYMFONY_PORT}/v2/users/ser56
+
+bench-go-prefork-stress:
+	ab -n 20000 -c 50 -k http://localhost:${GO_PREFORK_PORT}/v2/users/ser56
 
 # Бенчмарки нагрузки сервера
 bench-swoole-sample:
@@ -78,6 +85,9 @@ bench-node-sample:
 bench-symfony-sample:
 	ab -n 1000000 -c 100 -k http://localhost:${SYMFONY_PORT}/sample
 
+bench-go-prefork-sample:
+	ab -n 1000000 -c 100 -k http://localhost:${GO_PREFORK_PORT}/sample
+
 # Бенчмарки нагрузки сервера (экстремальные)
 bench-swoole-sample-stress:
 	ab -n 5000000 -c 800 -k http://localhost:${SWOOLE_PORT}/sample
@@ -100,6 +110,9 @@ bench-node-sample-stress:
 bench-symfony-sample-stress:
 	ab -n 5000000 -c 800 -k http://localhost:${SYMFONY_PORT}/sample
 
+bench-go-prefork-sample-stress:
+	ab -n 5000000 -c 800 -k http://localhost:${GO_PREFORK_PORT}/sample
+
 # Сборка контейнеров
 build-swoole:
 	docker compose build --no-cache swoole-server
@@ -121,3 +134,6 @@ build-node:
 
 build-symfony:
 	docker compose build --no-cache symfony-server
+
+build-go-prefork:
+	docker compose build --no-cache go-prefork-server

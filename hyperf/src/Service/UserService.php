@@ -44,15 +44,16 @@ final readonly class UserService implements UserServiceInterface
                 ->table('users')
                 ->where('name', 'like', "%$name%")
                 ->count(),
-            'uuids' => static fn (): array => array_map(
-                static fn (): string => Uuid::uuid7()->toString(),
-                range(0, 1000)
-            ),
         ]);
+
+        $uuids = array_map(
+            static fn (): string => Uuid::uuid7()->toString(),
+            range(0, 1000)
+        );
 
         return [
             'data' => array_combine(
-                array_slice($data['uuids'], 0, count($data['data'])),
+                array_slice($uuids, 0, count($data['data'])),
                 $data['data']
             ),
             'total' => $data['total'],

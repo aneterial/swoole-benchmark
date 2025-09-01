@@ -6,7 +6,6 @@ use Hyperf\Server\Event;
 use Swoole\Constant;
 
 return [
-    // асинхронный сервер (дефолтный от swoole), запускает воркеры по кол-ву cpu (см Constant::OPTION_WORKER_NUM)
     'type' => Hyperf\Server\Server::class,
     'mode' => SWOOLE_PROCESS,
     'servers' => [
@@ -25,8 +24,10 @@ return [
         ],
     ],
     'settings' => [
-        Constant::OPTION_ENABLE_COROUTINE => true,
         Constant::OPTION_WORKER_NUM => 4,
+        Constant::OPTION_TASK_WORKER_NUM => 2,
+        Constant::OPTION_ENABLE_COROUTINE => true,
+        Constant::OPTION_TASK_ENABLE_COROUTINE => false,
         Constant::OPTION_PID_FILE => BASE_PATH . '/runtime/hyperf.pid',
         Constant::OPTION_OPEN_TCP_NODELAY => true,
         Constant::OPTION_MAX_COROUTINE => 100000,
@@ -39,5 +40,8 @@ return [
         Event::ON_WORKER_START => [Hyperf\Framework\Bootstrap\WorkerStartCallback::class, 'onWorkerStart'],
         Event::ON_PIPE_MESSAGE => [Hyperf\Framework\Bootstrap\PipeMessageCallback::class, 'onPipeMessage'],
         Event::ON_WORKER_EXIT => [Hyperf\Framework\Bootstrap\WorkerExitCallback::class, 'onWorkerExit'],
+
+        Event::ON_TASK => [Hyperf\Framework\Bootstrap\TaskCallback::class, 'onTask'],
+        Event::ON_FINISH => [Hyperf\Framework\Bootstrap\FinishCallback::class, 'onFinish'],
     ],
 ];

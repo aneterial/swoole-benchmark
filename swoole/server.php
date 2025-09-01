@@ -21,7 +21,7 @@ use Swoole\Http\Server;
 
 use function FastRoute\simpleDispatcher;
 
-const MODE = SWOOLE_BASE;
+const MODE = SWOOLE_PROCESS;
 const WORKER_NUM = 4;
 
 Coroutine::set(['hook_flags' => SWOOLE_HOOK_ALL]);

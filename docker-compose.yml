@@ -154,6 +154,25 @@ services:
           cpus: '2'
           memory: 1G
 
+  go-prefork-server:
+    build:
+      context: ./go-prefork
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    ports:
+      - ${GO_PREFORK_PORT}:8087
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+
   db:
     image: postgres
     restart: unless-stopped

@@ -53,7 +53,6 @@ final readonly class Users
     public function getUsersV2(string $name): array
     {
         $results = [];
-        $uuids = [];
 
         Coroutine::join([
             go(function() use ($name, &$results): void {
@@ -81,13 +80,12 @@ final readonly class Users
                     $this->db->put($pdo);
                 }
             }),
-            go(static function() use (&$uuids): void {
-                for ($i = 0; $i < 1000; $i++) {
-                    $uuid = Uuid::uuid7()->toString();
-                    $uuids[] = $uuid;
-                }
-            }),
         ]);
+
+        $uuids = array_map(
+            static fn (): string => Uuid::uuid7()->toString(),
+            range(0, 1000)
+        );
 
         $results['data'] = array_combine(
             array_slice($uuids, 0, count($results['data'])),

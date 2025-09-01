@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp/prefork"
 )
 
 func init() {
@@ -49,8 +50,10 @@ func main() {
 		Concurrency:                  0,
 	}
 
-	log.Printf("Go FastHTTP Server started at :8081")
-	if err := server.ListenAndServe(":8081"); err != nil {
+	preforkServer := prefork.New(server)
+
+	log.Printf("Go FastHTTP Server started at :8087")
+	if err := preforkServer.ListenAndServe(":8087"); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }
@@ -61,7 +64,7 @@ func initDb() *pgxpool.Pool {
 		log.Fatalf("Failed to parse connection string: %v", err)
 	}
 
-	config.MaxConns = 200
+	config.MaxConns = 50
 	config.MinConns = 25
 	config.MaxConnIdleTime = 0
 	config.HealthCheckPeriod = 1 * time.Minute
